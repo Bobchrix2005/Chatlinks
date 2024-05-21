@@ -5,5 +5,7 @@ const authRouter = express.Router();
 
 authRouter.post('/login', loginCtrl);
 authRouter.get('/register', registerCtrl);
+// changePassword
+// confirmPassword
 
 module.exports = authRouter;
