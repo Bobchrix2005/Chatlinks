@@ -13,12 +13,12 @@ export const auth = async (req,res,next) =>{
         let decodedData;
 
         if (token && isCustomAuth){
-            decodedData = jwt.verify(token, process.env.JWT_SECRET);
+            decodedData = jwt.verify(token, JWT_SECRET);
             req.userId = decodedData?.id;
             
         }else{
             decodedData = jwt.decode(token);
-            req.userId =decodedData ?.sub;
+            req.authId =decodedData ?.sub;
         }
         next();
     } catch (error){
