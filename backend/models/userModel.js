@@ -61,8 +61,8 @@ const User = sequelize.define('User', {
         defaultValue: [], // empty array no following
     },
     followers: {
-        type: DataTypes.JSONB, // or JSON
-        defaultValue: [], // empty array no followers
+        type: DataTypes.JSONB,
+        defaultValue: [],
     },
   
 });
