@@ -18,7 +18,7 @@ export const auth = async (req,res,next) =>{
             
         }else{
             decodedData = jwt.decode(token);
-            req.authId =decodedData ?.sub;
+            req.authUserId =decodedData ?.sub;
         }
         next();
     } catch (error){

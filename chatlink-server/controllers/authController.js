@@ -96,10 +96,88 @@ const loginCtrl = async(req, res) => {
 
 }
 
-//changePassword
-//changeUserName
+const changePasswordCtrl = async (req, res) => {
+
+    const { token } = req.params;
+
+    // Basic validation
+    if (!token) {
+        return res.status(400).json({ error: 'Invalid Link' });
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        // Extract user ID and new password from the token payload
+        const { id, hashedNewPassword } = decoded;
+         // Find user by ID
+         const user = await User.findOne({ where: { id } });
+
+         if (!user) {
+             return res.status(404).json({ error: 'User not found' });
+         }
+ 
+         user.password = hashedNewPassword;
+         await user.save();
+ 
+         // Return success response
+         res.status(200).json({ message: 'Password successfully changed' });
+     } catch (error) {
+        console.error(error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ error: 'Invalid Link' });
+        }
+        res.status(500).json({ error: 'An error occurred while changing the password' });
+    }
+}
+
+
+const sendPasswordChangeLinkCtrl = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    // Basic validation
+    if (!email || !newPassword) {
+        return res.status(400).json({ error: 'Please provide an email and new password' });
+    }
+
+    try {
+        // Find user by email
+        const user = await User.findOne({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const hashedNewPassword = await bcrypt.hash(password, 10);
+
+        // Generate JWT token
+        const token = jwt.sign({ id: user.id, hashedNewPassword }, process.env.JWT_SECRET, { expiresIn: '2h' });
+
+        // Create password change link
+        const passwordChangeLink = `${process.env.FRONTEND_URL}/change-password?token=${token}`;
+
+        // Email subject and text
+        const subject = 'Password Change Request';
+        const text = `You requested to change your password. Click the link below to set a new password:\n\n${passwordChangeLink}\n\nThis link will expire in 1 hour.`;
+
+        // Send password change email
+        await sendEmail(email, subject, text);
+
+        // Return success response
+        res.status(200).json({ message: `Password change link sent to ${email}` });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while creating the password change link' });
+    }
+}
+
+
 
 module.exports = {
     registerCtrl,
     loginCtrl,
+    changePasswordCtrl,
+    sendPasswordChangeLinkCtrl
 };

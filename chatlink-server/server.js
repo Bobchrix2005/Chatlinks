@@ -1,6 +1,7 @@
 const express = require('express');
 const sequelize = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes')
 const cors = require("cors");
 
 const server = express();
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 server.use(cors());
 server.use(express.json({limit: '100mb'}));
 server.use('/auth', authRoutes);
+server.use('/user', userRoutes);
 
 sequelize.sync()
     .then(() => {
