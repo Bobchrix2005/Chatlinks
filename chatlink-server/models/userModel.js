@@ -1,5 +1,5 @@
 const { DataTypes, UUIDV4  } = require('sequelize');
-const sequelize = require('../config/database');
+const sequelize = require('../config/dbConfig');
 
 const User = sequelize.define('User', {
     id: {
@@ -15,7 +15,7 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING(50),
         allowNull: false, 
     },
-    userName: {
+    username: {
         type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
@@ -61,15 +61,27 @@ const User = sequelize.define('User', {
         allowNull: true,
     },
     following: {
-        type: DataTypes.JSONB, // or JSON
-        defaultValue: [], // empty array no following
-    },
-    followers: {
-        type: DataTypes.JSONB,
+        type: DataTypes.ARRAY(DataTypes.STRING),
         defaultValue: [],
+        references: {
+            model: User,
+            key: 'id'
+        }
     },
+
+    followers: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        defaultValue: [],
+        references: {
+            model: User,
+            key: 'id'
+        }
+    },
+
   
 });
+
+
 
 
 module.exports = User;

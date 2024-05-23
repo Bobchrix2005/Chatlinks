@@ -1,5 +1,8 @@
-const { User } = require('../models/userModel.js');
+const  User  = require('../models/userModel.js');
+const { Op } = require('sequelize');
 const uploadFileToS3 = require('../utils/aws.js'); // Adjust path as needed
+
+
 
 const updateUserInfoCtrl = async (req, res) => {
     const { workplace, address, countryName, countryCode } = req.body;
@@ -156,9 +159,11 @@ const getUserProfileCtrl = async (req, res) => {
     }
 };
 
+
+
 const getFollowsCtrl = async (req, res) => {
-    const userId  = req.authUserId;
-    const {type} = req.params;
+    const userId = req.authUserId;
+    const { type } = req.params;
 
     try {
         // Find the user by ID
@@ -168,35 +173,36 @@ const getFollowsCtrl = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Get followers
-        let follows
-        if (type === 'followers'){
-
-             follows = await User.findAll({
-                where: {
-                    id: user.followers // Find users whose IDs are in the followers array
-                },
-                attributes: ['id', 'firstName', 'lastName', 'userName',  'profilePhotoUrl'] 
-            });
-
-        }else if(type === 'following'){
-
+        // Get followers or following based on type
+        let follows;
+        if (type === 'followers') {
             follows = await User.findAll({
                 where: {
-                    id: user.following // Find users whose IDs are in the followers array
+                    id: {
+                        [Op.in]: user.followers // Find users whose IDs are in the followers array
+                    }
                 },
-                attributes: ['id', 'firstName', 'lastName', 'userName', 'profilePhotoUrl']
+                attributes: ['id', 'firstName', 'lastName', 'username', 'profilePhotoUrl']
             });
-
+        } else if (type === 'following') {
+            follows = await User.findAll({
+                where: {
+                    id: {
+                        [Op.in]: user.following // Find users whose IDs are in the following array
+                    }
+                },
+                attributes: ['id', 'firstName', 'lastName', 'username', 'profilePhotoUrl']
+            });
         }
 
-        // Return followers
-        res.status(200).json({ follows });
+        // Return followers or following
+        res.status(200).json(follows);
     } catch (error) {
         console.error('Error fetching:', error);
         res.status(500).json({ error: 'An error occurred while fetching' });
     }
 };
+
 
 
 

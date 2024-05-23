@@ -26,7 +26,7 @@ const registerCtrl = async (req, res) => {
         }
 
         // Generate a unique username
-        const userName = await generateUniqueUsername(firstName, lastName);
+        const username = await generateUniqueUsername(firstName, lastName);
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -35,7 +35,7 @@ const registerCtrl = async (req, res) => {
         const newUser = await User.create({
             firstName,
             lastName,
-            userName,
+            username,
             email,
             password: hashedPassword
         });
@@ -48,7 +48,7 @@ const registerCtrl = async (req, res) => {
             data: {
                 firstName,
                 lastName,
-                userName,
+                username,
                 email,
                 token
                 }
@@ -70,7 +70,7 @@ const loginCtrl = async(req, res) => {
         // Find user by email or username
         const user = await User.findOne({
             where: {
-                [Op.or]: [{ email: identifier }, { userName: identifier }]
+                [Op.or]: [{ email: identifier }, { username: identifier }]
             }
         });
 
