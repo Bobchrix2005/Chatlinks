@@ -139,7 +139,7 @@ const toggleFollowUserCtrl = async (req, res) => {
 };
 
 const getUserProfileCtrl = async (req, res) => {
-    const  userId  = req.authUserId;
+    const  {userId}  = req.params;
 
     try { 
         // Find the user by ID
@@ -162,8 +162,8 @@ const getUserProfileCtrl = async (req, res) => {
 
 
 const getFollowsCtrl = async (req, res) => {
-    const userId = req.authUserId;
-    const { type } = req.params;
+    const {userId, type } = req.params;
+
 
     try {
         // Find the user by ID
