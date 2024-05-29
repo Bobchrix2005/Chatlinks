@@ -1,6 +1,7 @@
 const { DataTypes, UUIDV4 } = require('sequelize');
 const sequelize = require('../config/dbConfig');
 const User = require('./userModel');
+const Post = require('./postModel');
 
 const Notification = sequelize.define('Notification', {
     id: {

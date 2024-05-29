@@ -76,5 +76,5 @@ const readNotificationsCtrl = async (req, res) => {
 
 
 module.exports = {
-    getUserNotificationsCtrl, createNotificationCtrl, markNotificationsAsReadCtrl
+    getUserNotificationsCtrl, createNotificationCtrl, readNotificationsCtrl
 }

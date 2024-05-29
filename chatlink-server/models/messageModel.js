@@ -38,8 +38,15 @@ const Message = sequelize.define('Message', {
         allowNull: false,
     },
     mediaUrls: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: true,
+        type: DataTypes.JSON, 
+        defaultValue: [], 
+        get() {
+            const value = this.getDataValue('mediaUrls');
+            return value ? value : [];
+        },
+        set(value) {
+            this.setDataValue('mediaUrls', value);
+        }
     },
     createdAt: {
         type: DataTypes.DATE,

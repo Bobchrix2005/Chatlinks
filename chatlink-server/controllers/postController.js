@@ -43,7 +43,7 @@ const getAllPostsCtrl = async(req, res) => {
 
 const getUserPostsCtrl = async(req, res) => {
 
-    const {userId} = req.params;
+    const {userId} = req.params; //not using authId coz can get any user posts
 
     try {
         // Fetch all posts

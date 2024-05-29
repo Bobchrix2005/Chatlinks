@@ -61,21 +61,31 @@ const User = sequelize.define('User', {
         allowNull: true,
     },
     following: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: [],
-        references: {
-            model: User,
-            key: 'id'
+
+        type: DataTypes.JSON, 
+        defaultValue: [], 
+        get() {
+            const value = this.getDataValue('following');
+            return value ? value : [];
+        },
+        set(value) {
+            this.setDataValue('following', value);
         }
+      
     },
 
     followers: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: [],
-        references: {
-            model: User,
-            key: 'id'
+        
+         type: DataTypes.JSON, 
+        defaultValue: [], 
+        get() {
+            const value = this.getDataValue('followers');
+            return value ? value : [];
+        },
+        set(value) {
+            this.setDataValue('followers', value);
         }
+     
     },
 
   

@@ -21,28 +21,40 @@ const Post = sequelize.define('Post', {
         allowNull: false,
     },
     mediaUrls: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: true,
+        type: DataTypes.JSON, 
+        defaultValue: [], 
+        get() {
+            const value = this.getDataValue('mediaUrls');
+            return value ? value : [];
+        },
+        set(value) {
+            this.setDataValue('mediaUrls', value);
+        }
     },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
     likes: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: [],
-        references: {
-            model: User,
-            key: 'id'
+        type: DataTypes.JSON, 
+        defaultValue: [], 
+        get() {
+            const value = this.getDataValue('likes');
+            return value ? value : [];
+        },
+        set(value) {
+            this.setDataValue('likes', value);
         }
     },
     updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
-}, {
+}, 
+{
     timestamps: true,
-});
+}
+);
 
 User.hasMany(Post, { foreignKey: 'userId', as: 'userPosts' });
 Post.belongsTo(User, { foreignKey: 'userId', as: 'postUser' });

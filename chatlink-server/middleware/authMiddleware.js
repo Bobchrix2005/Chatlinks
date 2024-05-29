@@ -1,11 +1,11 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-import dotenv from 'dotenv';
+const dotenv = require ('dotenv');
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-export const auth = async (req,res,next) =>{
+const auth = async (req,res,next) =>{
     try{
         const token = req.headers.authorization.split(" ")[1];
         const isCustomAuth = token.length <500;
@@ -25,3 +25,5 @@ export const auth = async (req,res,next) =>{
         console.log(error);
     }
 }
+
+module.exports = auth

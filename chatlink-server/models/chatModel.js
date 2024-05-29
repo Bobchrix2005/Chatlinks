@@ -17,11 +17,14 @@ const Chat = sequelize.define('Chat', {
         }
     },
     otherMembers: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: [],
-        references: {
-            model: User,
-            key: 'id'
+        type: DataTypes.JSON, 
+        defaultValue: [], 
+        get() {
+            const value = this.getDataValue('otherMembers');
+            return value ? value : [];
+        },
+        set(value) {
+            this.setDataValue('otherMembers', value);
         }
     },
     name: {

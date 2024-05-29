@@ -1,10 +1,7 @@
 const Comment = require('../models/commentModel');
-
-
-const Comment = require('../models/postModel');
 const User = require('../models/userModel');
-const Comment = require('../models/commentModel');
-const sequelize = require('../config/dbConfig');
+
+
 
 
 const commentIncludeFormat = 
