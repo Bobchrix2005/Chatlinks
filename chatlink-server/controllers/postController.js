@@ -86,6 +86,7 @@ const createPostCtrl = async(req, res) => {
     try {
         // Extract data from the request body
         const userId = req.authUserId;
+        //upload first
         const {content, mediaUrls } = req.body;
 
         // Validate request body

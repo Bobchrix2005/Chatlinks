@@ -1,4 +1,4 @@
-const { User } = require('../models/userModel');
+const  User  = require('../models/userModel');
 const { Op } = require('sequelize');
 
 // Function to generate a random alphanumeric string

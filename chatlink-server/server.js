@@ -8,12 +8,17 @@ const commentRoutes = require('./routes/commentRoutes');
 const cors = require("cors");
 
 const server = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 //const FRONTEND_URL =  "http://localhost:3000" 
 //server.use(cors({origin: FRONTEND_URL}));
 server.use(cors());
-server.use(express.json({limit: '100mb'}));
+server.use(express.json({limit: '100mb'})); 
+
+server.get('/', (req, res) => {
+    res.send('Chatlink Server Working!');
+  });
+
 server.use('/auth', authRoutes);
 server.use('/user', userRoutes);
 server.use('/post', postRoutes);

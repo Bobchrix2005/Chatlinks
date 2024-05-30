@@ -55,7 +55,7 @@ const User = sequelize.define('User', {
     workPlace: {
         type: DataTypes.STRING(100),
         allowNull: true,
-    },
+    }, 
     address: {
         type: DataTypes.STRING(100),
         allowNull: true,

@@ -4,14 +4,23 @@ const uploadFileToS3 = require('../utils/aws.js'); // Adjust path as needed
 
 
 
-const updateUserInfoCtrl = async (req, res) => {
-    const { workplace, address, countryName, countryCode } = req.body;
-    const userId = req.authUserId
+const editProfileCtrl = async (req, res) => {
+
+    const firstName = req.body?.firstName;
+    const lastName = req.body?.lastName;
+    const username = req.body?.username;
+    const workPlace =  req.body?.workPlace;
+    const address = req.body?.address;
+    const countryName =  req.body?.countryName;
+    const countryCode = req.body?.countryCode;
+    const userId = req.authUserId;
+    
 
 
     try {
   
-        const user = await User.findOne({ where: { id: userId } });
+        const user = await User.findByPk(userId)
+      
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -20,8 +29,30 @@ const updateUserInfoCtrl = async (req, res) => {
         // Check for changes and update the database
         let hasChanges = false;
 
-        if (workplace && workplace !== user.workPlace) {
-            user.workPlace = workplace;
+        if (firstName && firstName !== user.firstName) {
+            user.firstName = firstName;
+            hasChanges = true;
+        }
+
+        if (lastName && lastName !== user.lastName) {
+            user.lastName = lastName;
+            hasChanges = true;
+        }
+
+
+        if (username && username !== user.username) {
+            const existingUser = await User.findOne({where:{username}})
+            if(existingUser){
+                return res.status(200).json({ message: 'Username Taken' });  
+            }else{
+                user.username = username;
+                hasChanges = true;  
+            }
+         
+        }
+
+        if (workPlace && workPlace !== user.workPlace) {
+            user.workPlace = workPlace;
             hasChanges = true;
         }
 
@@ -207,7 +238,7 @@ const getFollowsCtrl = async (req, res) => {
 
 
 module.exports = {
-    updateUserInfoCtrl,
+    editProfileCtrl,
     uploadUserPhotoCtrl,
     toggleFollowUserCtrl,
     getUserProfileCtrl,

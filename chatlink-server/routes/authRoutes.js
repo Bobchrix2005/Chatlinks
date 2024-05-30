@@ -2,8 +2,8 @@ const express = require('express');
 const {loginCtrl, registerCtrl,
     changePasswordCtrl,
     sendPasswordChangeLinkCtrl} = require('../controllers/authController');
-
-const authRouter = express.Router();
+ 
+const authRouter = express.Router(); 
 
 authRouter.post('/login', loginCtrl);
 authRouter.post('/register', registerCtrl);

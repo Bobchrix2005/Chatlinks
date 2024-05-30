@@ -14,11 +14,10 @@ const auth = async (req,res,next) =>{
 
         if (token && isCustomAuth){
             decodedData = jwt.verify(token, JWT_SECRET);
-            req.userId = decodedData?.id;
+            req.authUserId = decodedData?.id;
             
         }else{
-            decodedData = jwt.decode(token);
-            req.authUserId =decodedData ?.sub;
+            return res.status(200).json({ message: 'Session Token Expired' });
         }
         next();
     } catch (error){
