@@ -1,6 +1,6 @@
 const  User  = require('../models/userModel.js');
 const { Op } = require('sequelize');
-const uploadFileToS3 = require('../utils/aws.js'); // Adjust path as needed
+const uploadFilesToS3 = require('../utils/aws.js'); // Adjust path as needed
 
 
 
@@ -82,6 +82,7 @@ const editProfileCtrl = async (req, res) => {
 const uploadUserPhotoCtrl = async (req, res) => {
     const { userId } = req.authUserId;
     const {type} = req.body;
+    const files = req.files || (req.file ? [req.file] : []);
 
  
     if (!userId) {
@@ -90,7 +91,7 @@ const uploadUserPhotoCtrl = async (req, res) => {
 
     try {
        
-        if (!req.file) {
+        if (files?.length>0) {
             return res.status(400).json({ error: 'No file uploaded' });
         } 
 
@@ -100,10 +101,10 @@ const uploadUserPhotoCtrl = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-
-        // Upload file to S3
-      
-        const fileUrl = await uploadFileToS3(req.file.buffer, req.file.originalname, process.env.AWS_BUCKET_NAME, 'user-photos');
+ 
+        // Upload file to S3 
+        const fileUrlArr = await uploadFilesToS3(req.file, 'your-s3-bucket-name', 'your-folder-path');
+        const fileUrl = fileUrlArr[0]; //returns array thats why i did it this way
 
         // Update user's photoUrl in database
         if(type === 'profile picture'){
@@ -132,15 +133,17 @@ const toggleFollowUserCtrl = async (req, res) => {
 
     try {
         // Find the user and the target user
-        const user = await User.findByPk(userId);
+        const user = await User.findByPk(userId); //Add limit to info gotten
         const targetUser = await User.findByPk(targetUserId);
+       
 
         if (!targetUser) {
-            return res.status(404).json({ error: 'User(s) not found' });
+            return res.status(404).json({ error: 'User not found' });
         }
 
         // Check if user is following the target user
         const isFollowing = user.following.includes(targetUserId);
+      
 
         if (isFollowing) {
             // If user is already following, unfollow
@@ -154,11 +157,12 @@ const toggleFollowUserCtrl = async (req, res) => {
             res.status(200).json({ message: 'User unfollowed successfully' });
         } else {
             // If user is not following, follow
-            user.following.push(targetUserId);
+          
+            user.following = [...user.following, targetUserId];
             await user.save();
 
             // Add user to followers list for target user
-            targetUser.followers.push(userId);
+            targetUser.followers = [...targetUser.followers, userId];
             await targetUser.save();
 
             res.status(200).json({ message: 'User followed successfully' });
@@ -171,6 +175,8 @@ const toggleFollowUserCtrl = async (req, res) => {
 
 const getUserProfileCtrl = async (req, res) => {
     const  {userId}  = req.params;
+
+    console.log(userId)
 
     try { 
         // Find the user by ID
@@ -194,6 +200,8 @@ const getUserProfileCtrl = async (req, res) => {
 
 const getFollowsCtrl = async (req, res) => {
     const {userId, type } = req.params;
+
+    console.log(type)
 
 
     try {

@@ -40,10 +40,10 @@ const Post = sequelize.define('Post', {
         defaultValue: [], 
         get() {
             const value = this.getDataValue('likes');
-            return value ? value : [];
+            return Array.isArray(value) ? value : [];
         },
         set(value) {
-            this.setDataValue('likes', value);
+            this.setDataValue('likes', Array.isArray(value) ? value : []);
         }
     },
     updatedAt: {

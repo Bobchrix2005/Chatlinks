@@ -1,29 +1,33 @@
-
 const s3 = require('../config/awsConfig');
 
+const uploadFilesToS3 = (files, bucketName, folderPath) => {
+    if (!Array.isArray(files)) {
+        files = [files];
+    }
 
-const uploadFileToS3 = (fileBuffer, filename, bucketName, folderPath) => {
-    
-    return new Promise((resolve, reject) => {
+    const uploadPromises = files.map(file => {
         const params = {
             Bucket: bucketName,
-            Key: `${folderPath}/${Date.now()}_${filename}`,
-            Body: fileBuffer,
-            ContentType: 'application/octet-stream',
+            Key: `${folderPath}/${Date.now()}_${file.originalname}`,
+            Body: file.buffer,
+            ContentType: file.mimetype,
             ACL: 'public-read',
         };
 
-        s3.upload(params, (err, data) => {
-            if (err) {
-                console.error('Error uploading file to S3:', err);
-                reject(err);
-            } else {
-                console.log('File uploaded to S3 successfully:', data.Location);
-                const fileUrl = data.Location;
-                resolve(fileUrl);
-            }
+        return new Promise((resolve, reject) => {
+            s3.upload(params, (err, data) => {
+                if (err) {
+                    console.error('Error uploading file to S3:', err);
+                    reject(err);
+                } else {
+                    console.log('File uploaded to S3 successfully:', data.Location);
+                    resolve(data.Location);
+                }
+            });
         });
     });
+
+    return Promise.all(uploadPromises);
 };
 
-module.exports = uploadFileToS3;
+module.exports = uploadFilesToS3;

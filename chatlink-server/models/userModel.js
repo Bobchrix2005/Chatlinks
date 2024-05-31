@@ -61,15 +61,16 @@ const User = sequelize.define('User', {
         allowNull: true,
     },
     following: {
+        
 
         type: DataTypes.JSON, 
         defaultValue: [], 
         get() {
             const value = this.getDataValue('following');
-            return value ? value : [];
+            return Array.isArray(value) ? value : [];
         },
         set(value) {
-            this.setDataValue('following', value);
+            this.setDataValue('following', Array.isArray(value) ? value : []);
         }
       
     },
@@ -80,10 +81,10 @@ const User = sequelize.define('User', {
         defaultValue: [], 
         get() {
             const value = this.getDataValue('followers');
-            return value ? value : [];
+            return Array.isArray(value) ? value : [];
         },
         set(value) {
-            this.setDataValue('followers', value);
+            this.setDataValue('followers', Array.isArray(value) ? value : []);
         }
      
     },

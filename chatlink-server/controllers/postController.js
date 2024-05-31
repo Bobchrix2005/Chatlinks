@@ -4,39 +4,40 @@ const Post = require('../models/postModel');
 const User = require('../models/userModel');
 const Comment = require('../models/commentModel');
 const sequelize = require('../config/dbConfig');
+const uploadFilesToS3 = require('../utils/aws')
 
 
 //format for fetching post
-const postIncludeFormat = 
-    [
+const postIncludeFormat = {
+    include: [
         {
             model: User,
             as: 'postUser',
             attributes: ['id', 'firstName', 'lastName', 'username', 'profilePhotoUrl'],
         },
-        {
-            model: Comment,
-            as: 'postComments',
-            attributes: ['id'],
-            // Group by postId and count comments for each post
-            group: ['Comment.postId'],
-            // Include count of comments
-            attributes: [
-                [sequelize.fn('COUNT', sequelize.col('postComments.id')), 'commentsCount'],
-            ],
-        },
-    ]
+    
+    ],
+    attributes: {
+        include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM `Comments` WHERE `Comments`.`postId` = `Post`.`id`)'), 'commentsCount'],
+        ],
+    },
+    order: [['createdAt', 'DESC']],
+}
+   
 
 
 const getAllPostsCtrl = async(req, res) => {
     try {
         // Fetch all posts
-        const posts = await Post.findAll({include: postIncludeFormat,  order: [['createdAt', 'DESC']]});
+        const posts = await Post.findAll(postIncludeFormat);
+
+        //const posts = await Post.findAll({include: postIncludeFormat,  order: [['createdAt', 'DESC']]});
 
      
         res.status(200).json(posts);
     } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error fetching posts:', error?.message);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
@@ -47,7 +48,7 @@ const getUserPostsCtrl = async(req, res) => {
 
     try {
         // Fetch all posts
-        const posts = await Post.findAll({where:{userId}, include: postIncludeFormat,  order: [['createdAt', 'DESC']]});
+        const posts = await Post.findAll({where:{userId}, ...postIncludeFormat});
 
      
         res.status(200).json(posts);
@@ -66,9 +67,7 @@ const getPostByIdCtrl = async (req, res) => {
 
     try {
         // Fetch the post by its primary key and include related models
-        const post = await Post.findByPk(postId, {
-            include: postIncludeFormat
-        });
+        const post = await Post.findByPk(postId, postIncludeFormat);
 
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
@@ -84,15 +83,19 @@ const getPostByIdCtrl = async (req, res) => {
 const createPostCtrl = async(req, res) => {
 
     try {
+        const files = req?.files || (req?.file ? [req?.file] : []);
+        console.log('create-post');
         // Extract data from the request body
         const userId = req.authUserId;
         //upload first
-        const {content, mediaUrls } = req.body;
+        const {content} = req.body;
 
-        // Validate request body
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+        //add file validation after tests
+
+        let mediaUrls = [];
+
+        if (files?.length>0){
+            mediaUrls = await uploadFilesToS3(files, 'your-s3-bucket-name', 'your-folder-path');
         }
 
         // Create the post
@@ -100,15 +103,62 @@ const createPostCtrl = async(req, res) => {
             userId,
             content,
             mediaUrls
-        });
+        }); 
 
         return res.status(201).json(newPost);
     } catch (error) {
-        console.error('Error creating post:', error);
+        console.error('Error creating post:', error?.message);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 
 }
+
+
+const toggleLikePostCtrl = async (req, res) => {
+    const {postId } = req.body;
+    const userId = req.authUserId;
+
+   
+    if (!postId) {
+        return res.status(400).json({ error: 'Post Id Not Found' });
+    }
+
+    try {
+ 
+     
+        const post = await Post.findByPk(postId);
+       
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+
+        const isLiked = post.likes.includes(userId);
+      
+
+        if (isLiked) {
+
+       
+            post.likes = post.likes.filter(id => id !== userId);
+            await post.save();
+
+            res.status(200).json({ message: 'Post unliked successfully' });
+
+        } else {
+
+          
+            post.likes = [...post.likes, userId];
+            await post.save();
+
+            res.status(200).json({ message: 'Post liked successfully' });
+        }
+
+    } catch (error) {
+        console.error('Error toggling follow status:', error);
+        res.status(500).json({ error: 'An error occurred while toggling follow status' });
+    }
+};
 
 
 const deletePostCtrl = async (req, res) => {
@@ -181,4 +231,4 @@ const editPostCtrl = async (req, res) => {
 
 
 
-module.exports = { getAllPostsCtrl, getUserPostsCtrl, getPostByIdCtrl, deletePostCtrl, createPostCtrl, editPostCtrl};
+module.exports = { getAllPostsCtrl, getUserPostsCtrl, getPostByIdCtrl, toggleLikePostCtrl, deletePostCtrl, createPostCtrl, editPostCtrl};

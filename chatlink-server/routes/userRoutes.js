@@ -12,7 +12,7 @@ userRouter.post('/upload-photo', auth, upload.single('photo'), uploadUserPhotoCt
 userRouter.get('/:userId', getUserProfileCtrl);
 userRouter.post ('/edit-profile', auth, editProfileCtrl);
 userRouter.get('/:userId/:type', getFollowsCtrl);
-userRouter.post ('/follow', auth, toggleFollowUserCtrl);
+userRouter.post ('/toggle-follow', auth, toggleFollowUserCtrl);
 
 // changePassword
 // confirmPassword
