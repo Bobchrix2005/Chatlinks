@@ -16,6 +16,7 @@ const commentIncludeFormat =
 const createCommentCtrl = async (req, res) => {
     try {
         const { notificationId,content, type } = req.body;
+        
         const userId = req.authUserId;
 
         // Check if required fields are present
